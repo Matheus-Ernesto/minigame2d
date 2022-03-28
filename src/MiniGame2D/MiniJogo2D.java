@@ -18,11 +18,15 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import MiniGame2D.GameEngine2D.KeyMapper;
+import MiniGame2D.GameEngine2D.Vector2d;
 
 public class MiniJogo2D{
 	private static JFrame janela = new JFrame();
 	private static GameEngine2D engine = new GameEngine2D();
 	public static Canvas canvas = new Canvas();
+	static float vetorX = 0;
+	static float vetorY = 0;
+	static float vetorZ = 0;
 
 	public static void main(String[] args) {
 		//Criar uma janela
@@ -66,49 +70,90 @@ public class MiniJogo2D{
 		cena.renderObjects(20, 0, 0, false);
 	
 		engine.setFPS(30);
-		engine.setBeforeframeFPS(10);
-		engine.setRunnables(() -> {}, () -> {}, () -> {});
+		engine.setBeforeframeFPS(30);
+		engine.setRunnables(() -> {
+			cena.renderObjects(20, cena.cameraPositionX, cena.cameraPositionY, false);
+		}, () -> {}, () -> {});
+		engine.start();
 		
-		AbstractAction mover =  new AbstractAction() {
+		AbstractAction moverUp =  new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				switch(e.getActionCommand().toLowerCase()) {
-				case "w":
-					cena.renderObjects(cena.cameraPositionZ, cena.cameraPositionX, cena.cameraPositionY+0.1, false);
-					break;
-				case "a":
-					cena.renderObjects(cena.cameraPositionZ, cena.cameraPositionX-0.1, cena.cameraPositionY, false);
-					break;
-				case "s":
-					cena.renderObjects(cena.cameraPositionZ, cena.cameraPositionX, cena.cameraPositionY-0.1, false);
-					break;
-				case "d":
-					cena.renderObjects(cena.cameraPositionZ, cena.cameraPositionX+0.1, cena.cameraPositionY, false);
-					break;
-				default:
-					break;
-				}
+				System.out.println("W 0");
+				cena.cameraPositionY += 0.1;
+			}
+		};
+		AbstractAction moverUpRel =  new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("W 1");
+				cena.cameraPositionY += 0.05;
+			}
+		};
+		AbstractAction moverDown =  new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				cena.cameraPositionY -= 0.1;
+			}
+		};
+		AbstractAction moverDownRel =  new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				cena.cameraPositionY -= 0.05;
+			}
+		};
+		AbstractAction moverRight =  new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("W 0");
+				cena.cameraPositionX += 0.1;
+			}
+		};
+		AbstractAction moverRightRel =  new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("W 1");
+				cena.cameraPositionX += 0.05;
+			}
+		};
+		AbstractAction moverLeft =  new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				cena.cameraPositionX -= 0.1;
+			}
+		};
+		AbstractAction moverLeftRel =  new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				cena.cameraPositionX -= 0.05;
 			}
 		};
 		AbstractAction zoomUp =  new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				System.out.println("C");
 				cena.renderObjects(cena.cameraPositionZ+0.1, cena.cameraPositionX, cena.cameraPositionY, false);
 			}
 		};
 		AbstractAction zoomDown =  new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				System.out.println("V");
 				cena.renderObjects(cena.cameraPositionZ-0.1, cena.cameraPositionX, cena.cameraPositionY, false);
 			}
 		};
+		
 		GameEngine2D.KeyMapper kmp = new GameEngine2D.KeyMapper();
-		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, mover, "moveUp",KeyStroke.getKeyStroke(KeyEvent.VK_W, 0));
-		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, mover, "moveLeft",KeyStroke.getKeyStroke(KeyEvent.VK_A, 0));
-		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, mover, "moveDown",KeyStroke.getKeyStroke(KeyEvent.VK_S, 0));
-		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, mover, "moveRight",KeyStroke.getKeyStroke(KeyEvent.VK_D, 0));
-		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, zoomUp, "zoomUp",KeyStroke.getKeyStroke(KeyEvent.VK_C, 0));
-		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, zoomDown, "zoomDown",KeyStroke.getKeyStroke(KeyEvent.VK_V, 0));
+		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, moverUp, "moveUp",KeyStroke.getKeyStroke(KeyEvent.VK_W, 0,false));
+		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, moverUpRel, "moveUpRel",KeyStroke.getKeyStroke(KeyEvent.VK_W, 0,true));
+		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, moverDown, "moveDown",KeyStroke.getKeyStroke(KeyEvent.VK_S, 0,false));
+		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, moverDownRel, "moveDownRel",KeyStroke.getKeyStroke(KeyEvent.VK_S, 0,true));
+		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, moverRight, "moveRight",KeyStroke.getKeyStroke(KeyEvent.VK_D, 0,false));
+		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, moverRightRel, "moveRightRel",KeyStroke.getKeyStroke(KeyEvent.VK_D, 0,true));
+		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, moverLeft, "moveLeft",KeyStroke.getKeyStroke(KeyEvent.VK_A, 0,false));
+		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, moverLeftRel, "moveLeftRel",KeyStroke.getKeyStroke(KeyEvent.VK_A, 0,true));
+		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, zoomUp, "zoomUp",KeyStroke.getKeyStroke(KeyEvent.VK_C, 0,false));
+		kmp.setActionByKey(cena, cena.WHEN_IN_FOCUSED_WINDOW, zoomDown, "zoomDown",KeyStroke.getKeyStroke(KeyEvent.VK_V, 0,false));
 	}
 	
 }
@@ -177,6 +222,7 @@ class GameEngine2D{
 	}
 	static class KeyMapper {
 		public void setActionByKey(JComponent component,int focus, Action action, String name, KeyStroke key) {
+			System.out.println(name + " action to " + key.getKeyChar());
 			component.getInputMap(focus).put(key, name);
 			component.getActionMap().put(name,action);
 		}
