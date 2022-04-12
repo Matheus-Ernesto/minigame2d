@@ -20,9 +20,12 @@ public class MiniJogo2D{
 	private static JFrame janela = new JFrame();
 	private static GameEngine2D engine = new GameEngine2D();
 	public static Canvas canvas = new Canvas();
-	static float vetorX = 0;
-	static float vetorY = 0;
-	static float vetorZ = 0;
+	static float vetorW = 0;
+	static float vetorA = 0;
+	static float vetorS = 0;
+	static float vetorD = 0;
+	static float vetorC = 0;
+	static float vetorV = 0;
 
 	public static void main(String[] args) {
 		//Criar uma janela
@@ -59,15 +62,15 @@ public class MiniJogo2D{
 		cena.renderObjects(20, 0, 0, false);
 	
 		engine.createRunnableStart(() -> {
-			cena.renderObjects(cena.cameraPositionZ + vetorZ, cena.cameraPositionX + vetorX, cena.cameraPositionY + vetorY, false);
-			}, 30);
+			cena.renderObjects(cena.cameraPositionZ + vetorC + vetorV, cena.cameraPositionX + vetorA + vetorD, cena.cameraPositionY +  vetorW + vetorS, false);
+		}, 30);
 		
 		AbstractAction moverUp =  new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cena.cameraPositionY += 0.1;
+				vetorW = 0.1f;
 			}
 		};
 		AbstractAction moverUpRel =  new AbstractAction() {
@@ -75,7 +78,7 @@ public class MiniJogo2D{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cena.cameraPositionY += 0.05;
+				vetorW = 0f;
 			}
 		};
 		AbstractAction moverDown =  new AbstractAction() {
@@ -83,7 +86,7 @@ public class MiniJogo2D{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cena.cameraPositionY -= 0.1;
+				vetorS = -0.1f;
 			}
 		};
 		AbstractAction moverDownRel =  new AbstractAction() {
@@ -91,7 +94,7 @@ public class MiniJogo2D{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cena.cameraPositionY -= 0.05;
+				vetorS = 0f;
 			}
 		};
 		AbstractAction moverRight =  new AbstractAction() {
@@ -99,7 +102,7 @@ public class MiniJogo2D{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cena.cameraPositionX += 0.1;
+				vetorD = 0.1f;
 			}
 		};
 		AbstractAction moverRightRel =  new AbstractAction() {
@@ -107,7 +110,7 @@ public class MiniJogo2D{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cena.cameraPositionX += 0.05;
+				vetorD = 0f;
 			}
 		};
 		AbstractAction moverLeft =  new AbstractAction() {
@@ -115,7 +118,7 @@ public class MiniJogo2D{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cena.cameraPositionX -= 0.1;
+				vetorA = -0.1f;
 			}
 		};
 		AbstractAction moverLeftRel =  new AbstractAction() {
@@ -123,7 +126,7 @@ public class MiniJogo2D{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cena.cameraPositionX -= 0.05;
+				vetorA = 0f;
 			}
 		};
 		AbstractAction zoomUp =  new AbstractAction() {
@@ -131,7 +134,15 @@ public class MiniJogo2D{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cena.cameraPositionZ += 0.1;
+				vetorC = 0.2f;
+			}
+		};
+		AbstractAction zoomUpRel =  new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				vetorC = 0f;
 			}
 		};
 		AbstractAction zoomDown =  new AbstractAction() {
@@ -139,7 +150,15 @@ public class MiniJogo2D{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cena.cameraPositionZ -= 0.1;
+				vetorV = -0.2f;
+			}
+		};
+		AbstractAction zoomDownRel =  new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				vetorV = 0f;
 			}
 		};
 		
@@ -153,10 +172,17 @@ public class MiniJogo2D{
 		kmp.setActionByKey(cena, JComponent.WHEN_IN_FOCUSED_WINDOW, moverLeft, "moveLeft",KeyStroke.getKeyStroke(KeyEvent.VK_A, 0,false));
 		kmp.setActionByKey(cena, JComponent.WHEN_IN_FOCUSED_WINDOW, moverLeftRel, "moveLeftRel",KeyStroke.getKeyStroke(KeyEvent.VK_A, 0,true));
 		kmp.setActionByKey(cena, JComponent.WHEN_IN_FOCUSED_WINDOW, zoomUp, "zoomUp",KeyStroke.getKeyStroke(KeyEvent.VK_C, 0,false));
+		kmp.setActionByKey(cena, JComponent.WHEN_IN_FOCUSED_WINDOW, zoomUpRel, "zoomUpRel",KeyStroke.getKeyStroke(KeyEvent.VK_C, 0,true));
 		kmp.setActionByKey(cena, JComponent.WHEN_IN_FOCUSED_WINDOW, zoomDown, "zoomDown",KeyStroke.getKeyStroke(KeyEvent.VK_V, 0,false));
+		kmp.setActionByKey(cena, JComponent.WHEN_IN_FOCUSED_WINDOW, zoomDownRel, "zoomDownRel",KeyStroke.getKeyStroke(KeyEvent.VK_V, 0,true));
 	}
 	
 }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 class GameEngine2D{
 	private static boolean sair = false;
