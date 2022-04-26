@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -42,28 +43,7 @@ public class MiniJogo2D{
 				engine.stop();
 			}
 		});
-		
-		GameEngine2D.Scene cena = new GameEngine2D.Scene();
 		janela.setVisible(true);
-		janela.add(cena);
-		janela.addKeyListener(keymanager);
-		Image tile = null;
-		try {
-			tile = ImageIO.read(MiniJogo2D.class.getResource("tile_map32.png"));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		for (int iterator = 1; iterator <= 10;iterator++)  {
-			GameEngine2D.GameObject go = new GameEngine2D.GameObject();
-			go.setScale(1,iterator);
-			go.setPosition(iterator,0);
-			go.setImage(tile,go.STRETCH);
-			cena.add(go);			
-		}
-		
-		cena.setBounds(0,0,800,600);
-		cena.setBackground(Color.blue);
-		cena.renderObjects(20, 0, 0, false);
 		
 		engine.createRunnableStart(() -> {
 			fps++;
@@ -72,16 +52,14 @@ public class MiniJogo2D{
 			System.out.println(fps + " fps");
 			fps = 0;
 		}, 1);
-		engine.createRunnableStart(() -> {
-			cena.renderObjects(cena.cameraPositionZ + vetorC + vetorV, cena.cameraPositionX + vetorA + vetorD, cena.cameraPositionY +  vetorW + vetorS, false);
-		}, 120);
 		
 		keymanager = new GameEngine2D.KeyMapper() {
 			@Override
-			public void typed(KeyEvent e) {}
-
+			public void keyTyped(KeyEvent e) {
+			}
+			
 			@Override
-			public void pressed(KeyEvent e) {
+			public void keyPressed(KeyEvent e) {
 				char key = Character.toLowerCase(e.getKeyChar());
 				switch (key) {
 				case 'w':
@@ -96,6 +74,12 @@ public class MiniJogo2D{
 				case 'd':
 					vetorD = 0.1f;
 					break;
+				case 'c':
+					vetorC = -0.1f;
+					break;
+				case 'v':
+					vetorV = 0.1f;
+					break;
 				default:
 					
 					break;
@@ -103,7 +87,7 @@ public class MiniJogo2D{
 			}
 			
 			@Override
-			public void released(KeyEvent e) {
+			public void keyReleased(KeyEvent e) {
 				char key = Character.toLowerCase(e.getKeyChar());
 				switch (key) {
 				case 'w':
@@ -118,6 +102,12 @@ public class MiniJogo2D{
 				case 'd':
 					vetorD = 0f;
 					break;
+				case 'c':
+					vetorC = 0f;
+					break;
+				case 'v':
+					vetorV = 0f;
+					break;
 				default:
 					
 					break;
@@ -128,8 +118,6 @@ public class MiniJogo2D{
 		janela.addKeyListener(keymanager);
 	}
 }
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class GameEngine2D{
 	private static boolean sair = false;
@@ -152,97 +140,163 @@ class GameEngine2D{
 		sair = true;
 	}
 
-	static abstract class KeyMapper extends KeyAdapter{
-		public abstract void typed(KeyEvent e);
-		public abstract void pressed(KeyEvent e);
-		public abstract void released(KeyEvent e);
-		
-		@Override
-		public void keyTyped(KeyEvent e) {
-			typed(e);
-		}
-		
-		@Override
-		public void keyPressed(KeyEvent e) {
-			pressed(e);
-		}
-		
-		@Override
-		public void keyReleased(KeyEvent e) {
-			released(e);
-		}
-	}
+	static abstract class KeyMapper extends KeyAdapter{}
 	
-	static class Scene extends JPanel{
-		private static final long serialVersionUID = 1L;
-		public double cameraPositionX = 0;
-		public double cameraPositionY = 0;
-		public double cameraPositionZ = 0;
+	static class Scene{
+		ArrayList<GameObject> gameObjects = new ArrayList<GameObject>();
 		
-		public void renderObjects(double size, double x, double y,boolean stretch) {
-			cameraPositionX = x;
-			cameraPositionY = y;
-			cameraPositionZ = size;
-			
-			double PartX = this.getWidth() / size;
-			double PartY = (stretch) ? this.getHeight() / size: this.getWidth() / size;
-			
-			double X_cart = -x + size / 2;
-			double Y_cart = y + size / 2;
-			
-			Component[] comps = this.getComponents();
-			for (Component compt : comps) {
-				GameObject comp_t = (GameObject) compt;
-				int width = (int) (PartX * comp_t.r1.width);
-				int height = (int) (PartY * comp_t.r1.height);
-				
-				int x_local = (int) (PartX * (comp_t.r1.x + X_cart) - width/2);
-				int y_local = (int) (PartY * (comp_t.r1.y + Y_cart) - height/2);
-				comp_t.setBounds(x_local,y_local,width,height);
-			}
+		public void addObject(GameObject gm_t) {
+			this.gameObjects.add(gm_t);
 		}
-	}
-	
-	static class GameObject extends JComponent{
-		private static final long serialVersionUID = 1L;
-		private Image imagem;
-		public final int STRETCH = 0;
-		public final int TILED = 1;
 		
-		public Rectangle r1 = new Rectangle(0,0,1,1);
+		public void removeObject(int index) {
+			this.gameObjects.remove(index);
+		}
 		
-		public void setImage(Image imagem_t, int style) {
-			if(style == TILED) {
-				Graphics g = imagem_t.getGraphics();
-				
-				int width = (int) r1.getWidth();
-				int height = (int) r1.getHeight();
-				
-				Image scaled = imagem_t.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-				
-				for (int x = 0; x < imagem_t.getWidth(null); x += width) {
-					for (int y = 0; y < imagem_t.getHeight(null); y += height) {
-						g.drawImage(scaled, x, y, null);
-					}
+		public void setObjects(ArrayList<GameObject> gm_array) {
+			this.gameObjects = gm_array;
+		}
+		
+		public ArrayList<GameObject> getObjects(){
+			return gameObjects;
+		}
+		
+		public ArrayList<GameObject> getObjectsOnRadius(Vector2d local, double radius){
+			ArrayList<GameObject> radiusObjs = null;
+			
+			for (GameObject gameObj : gameObjects) {
+				if(gameObj.position.getX() <= radius || gameObj.position.getY() <= radius) {
+					radiusObjs.add(gameObj);
 				}
-				g.dispose();
-				this.imagem = imagem_t;				
-			}else {
-				this.imagem = imagem_t;
 			}
-		}
-		public void setScale(int x, int y) {
-			r1.width = x;
-			r1.height = y;
-		}
-		public void setPosition(int x, int y) {
-			r1.x = x;
-			r1.y = y;
+			
+			return radiusObjs;
 		}
 		
-		@Override
-		public void paint(Graphics g) {
-			g.drawImage(imagem, 0, 0, this.getWidth(), this.getHeight(),null);
+		public ArrayList<GameObject> getGameOBject() {
+			return gameObjects;
+		}
+	}
+	
+	static class Object{
+		public Vector2d position;
+		public Vector2d scale;
+		public Vector2d rotation;
+		
+		public void setPosition(Vector2d pos_t) {
+			this.position = pos_t;
+		}
+		
+		public Vector2d getPosition(){
+			return this.position;
+		}
+		
+		public void setScale(Vector2d scal_t) {
+			this.scale = scal_t;
+		}
+		
+		public Vector2d getScale(){
+			return this.scale;
+		}
+		
+		public void setRotation(Vector2d rot_t) {
+			this.rotation = rot_t;
+		}
+		
+		public Vector2d getRotation(){
+			return this.rotation;
+		}
+	}
+	
+	static class Camera extends Object{
+		public double radius = 0;
+		
+		public void setRadius(double rad_t) {
+			this.radius = rad_t;
+		}
+		
+		public double getRadius(){
+			return this.radius;
+		}
+	}
+	
+	static class GameObject extends Object{
+		private Texture texture;
+		
+		public void setTexture(Texture tex_t) {
+			this.texture = tex_t;
+		}
+		
+		public Texture getTexture() {
+			return texture;
+		}
+	}
+	
+	static class Light extends Object{
+		
+	}
+	
+	static class Texture{
+		
+	}
+	
+	static class RenderWindow extends JPanel{
+		
+		private static final long serialVersionUID = 1L;
+
+		public void recalculatePosition(Camera camera, Scene scene) {
+			//Camera Position
+			double x = camera.getPosition().getX();
+			double y = camera.getPosition().getY();
+			double z = camera.getRadius();
+			
+			double PartX = getWidth() / z * 2;
+			//double PartY = (stretch) ? this.getHeight() / z: this.getWidth() / z;
+			double PartY = this.getHeight() / z * 2;
+			
+			double X_cart = -x + z / 2;
+			double Y_cart = y + z / 2;
+			
+			ArrayList<GameObject> comps = scene.getObjectsOnRadius(new Vector2d(x,y), z);
+			for (GameObject comp : comps) {
+				int width = (int) (PartX * comp.getScale().getX());
+				int height = (int) (PartY *  comp.getScale().getY());
+				
+				int x_local = (int) (PartX * (comp.getPosition().getX() + X_cart) - width/2);
+				int y_local = (int) (PartY * (comp.getPosition().getY() + Y_cart) - height/2);
+				//Paint on this position
+			}
+		}
+	}
+	
+	static class Vector2d {
+		private double x = 0;
+		private double y = 0;
+		
+		public Vector2d(double x_t, double y_t) {
+			this.x = x_t;
+			this.y = y_t;
+		}
+		
+		public void set(double x_t, double y_t) {
+			this.x = x_t;
+			this.y = y_t;
+		}
+		
+		public void setX(double x_t) {
+			 this.x = x_t;
+		}
+		
+		public void setY(double y_t) {
+			this.y = y_t;
+		}
+		
+		public double getX() {
+			return this.x;
+		}
+		
+		public double getY() {
+			return this.y;
 		}
 	}
 }
