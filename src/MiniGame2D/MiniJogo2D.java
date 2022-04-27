@@ -20,7 +20,6 @@ import javax.swing.*;
 public class MiniJogo2D{
 	private static JFrame janela = new JFrame();
 	private static GameEngine2D engine = new GameEngine2D();
-	public static Canvas canvas = new Canvas();
 	static GameEngine2D.KeyMapper keymanager;
 	public static KeyEvent key;
 	static int fps = 0;
@@ -37,13 +36,13 @@ public class MiniJogo2D{
 		janela.setTitle("Mini Jogo 2D");
 		janela.setBounds(100, 100, 800, 600);
 		janela.setLayout(new FlowLayout());
+		janela.setVisible(true);
 		janela.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				engine.stop();
 			}
 		});
-		janela.setVisible(true);
 		
 		engine.createRunnableStart(() -> {
 			fps++;
@@ -116,6 +115,31 @@ public class MiniJogo2D{
 		};
 		
 		janela.addKeyListener(keymanager);
+		
+		GameEngine2D.Scene scene = new GameEngine2D.Scene();
+		GameEngine2D.GameObject gmObject1 = new GameEngine2D.GameObject();
+		GameEngine2D.Camera camera = new GameEngine2D.Camera();
+		GameEngine2D.Texture texture = new GameEngine2D.Texture();
+		GameEngine2D.RenderWindow window = new GameEngine2D.RenderWindow();
+		
+		texture.setBaseColor(Color.GREEN);
+		
+		gmObject1.setPosition(new GameEngine2D.Vector2d(0,0));
+		gmObject1.setScale(new GameEngine2D.Vector2d(1,1));
+		gmObject1.setTexture(texture);
+		
+		camera.setPosition(new GameEngine2D.Vector2d(0,0));
+		camera.setRadius(15);
+		
+		scene.addObject(gmObject1);
+
+		window.setBounds(0,0,800,600);
+		window.setBackground(Color.red);
+
+		janela.add(window);
+		
+		window.paintAllObjects(camera, scene);
+		
 	}
 }
 
@@ -162,7 +186,7 @@ class GameEngine2D{
 		}
 		
 		public ArrayList<GameObject> getObjectsOnRadius(Vector2d local, double radius){
-			ArrayList<GameObject> radiusObjs = null;
+			ArrayList<GameObject> radiusObjs = new ArrayList<GameObject>();
 			
 			for (GameObject gameObj : gameObjects) {
 				if(gameObj.position.getX() <= radius || gameObj.position.getY() <= radius) {
@@ -230,6 +254,7 @@ class GameEngine2D{
 		public Texture getTexture() {
 			return texture;
 		}
+		
 	}
 	
 	static class Light extends Object{
@@ -237,26 +262,36 @@ class GameEngine2D{
 	}
 	
 	static class Texture{
+		private Color baseColor;
 		
+		public void setBaseColor(Color color_t){
+			this.baseColor = color_t;
+		}
+		
+		public Color getBaseColor(){
+			return this.baseColor;
+		}
 	}
 	
 	static class RenderWindow extends JPanel{
 		
 		private static final long serialVersionUID = 1L;
+		private Graphics graphics;
 
-		public void recalculatePosition(Camera camera, Scene scene) {
+		public void paintAllObjects(Camera camera, Scene scene) {
+			graphics = this.getGraphics();
 			//Camera Position
-			double x = camera.getPosition().getX();
-			double y = camera.getPosition().getY();
-			double z = camera.getRadius();
+			double x = camera.getPosition().getX();//0
+			double y = camera.getPosition().getY();//0
+			double z = camera.getRadius();//15
 			
 			double PartX = getWidth() / z * 2;
 			//double PartY = (stretch) ? this.getHeight() / z: this.getWidth() / z;
 			double PartY = this.getHeight() / z * 2;
 			
-			double X_cart = -x + z / 2;
-			double Y_cart = y + z / 2;
-			
+			double X_cart = -x + z / 2;//7,5
+			double Y_cart = y + z / 2;//7,5
+			System.out.println("Part(" + PartX + "," + PartY + "), Cart(" + X_cart + "," + Y_cart + ")");
 			ArrayList<GameObject> comps = scene.getObjectsOnRadius(new Vector2d(x,y), z);
 			for (GameObject comp : comps) {
 				int width = (int) (PartX * comp.getScale().getX());
@@ -264,8 +299,11 @@ class GameEngine2D{
 				
 				int x_local = (int) (PartX * (comp.getPosition().getX() + X_cart) - width/2);
 				int y_local = (int) (PartY * (comp.getPosition().getY() + Y_cart) - height/2);
-				//Paint on this position
+				graphics.setColor(comp.getTexture().getBaseColor());
+				graphics.fillRect(x_local, y_local, width, height);
+				System.out.println("G(" + x_local + "," + y_local + "," + width + "," + height + "), C(" + comp.getTexture().getBaseColor().toString());
 			}
+			repaint();
 		}
 	}
 	
