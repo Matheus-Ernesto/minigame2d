@@ -124,7 +124,7 @@ public class MiniJogo2D{
 		camera.setStretch(false);
 		
 		window.setBounds(0,0,800,600);
-		window.setBackground(Color.red);
+		window.setBackground(Color.GRAY);
 
 		janela.add(window);
 
@@ -132,21 +132,27 @@ public class MiniJogo2D{
 		window.setCamera(camera);
 		
 		engine.createRunnableStart(() -> {
-			fps++;
 			window.renderFrame();
 		}, 99999);
+		
 		engine.createRunnableStart(() -> {
 			System.out.println(fps + " fps");
 			fps = 0;
 		}, 1);
+		
 		engine.createRunnableStart(() -> {
 			double x = camera.getPosition().getX() + vetorA + vetorD;
 			double y = camera.getPosition().getY() + vetorW + vetorS;
 			camera.setPosition(new GameEngine2D.Vector2d(x, y));
-			//renderObjects(cena.cameraPositionZ + vetorC + vetorV, cena.cameraPositionX + vetorA + vetorD, cena.cameraPositionY +  vetorW + vetorS, false);
 		}, 120);
+		
 	}
 }
+
+
+
+
+
 
 class GameEngine2D{
 	private static boolean sair = false;
@@ -294,6 +300,8 @@ class GameEngine2D{
 		private Camera camera = new Camera();
 		private Graphics graphics;
 		
+		ArrayList<GameObject> gameArray = new ArrayList<GameObject>();
+		
 		public void setScene(Scene scene_t) {
 			this.scene = scene_t;
 		}
@@ -304,8 +312,8 @@ class GameEngine2D{
 
 		public void renderFrame() {
 			graphics = super.getGraphics();
-			//graphics.setColor(getBackground());
-			//graphics.fillRect(0, 0, this.getWidth(), this.getHeight());
+			super.repaint();
+			/*
 			//Camera Position
 			double x = camera.getPosition().getX();
 			double y = camera.getPosition().getY();
@@ -326,13 +334,13 @@ class GameEngine2D{
 				graphics.setColor(comp.getTexture().getBaseColor());
 				graphics.fillRect(x_local, y_local, width, height);
 			}
+			super.paintComponent(graphics);*/
 		}
 
 		@Override
 		public void paintComponent(Graphics g) {
+			
 			super.paintComponent(graphics);
-			//g = graphics;
-			///super.paint(g);
 		}
 	}
 	
