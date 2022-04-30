@@ -1,7 +1,6 @@
 package MiniGame2D;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -108,10 +107,11 @@ public class MiniJogo2D{
 		GameEngine2D.Texture texture = new GameEngine2D.Texture();
 		GameEngine2D.RenderWindow window = new GameEngine2D.RenderWindow();
 		GameEngine2D.Camera camera = new GameEngine2D.Camera();
+		janela.add(window);
 		
 		texture.setBaseColor(Color.GREEN);
 
-		for (int cont = 0;cont <= 10; cont++) {
+		for (int cont = 0;cont <= 3; cont++) {
 			GameEngine2D.GameObject gmObject = new GameEngine2D.GameObject();
 			gmObject.setPosition(new GameEngine2D.Vector2d(cont,0));
 			gmObject.setScale(new GameEngine2D.Vector2d(1,1));
@@ -126,24 +126,22 @@ public class MiniJogo2D{
 		window.setBounds(0,0,800,600);
 		window.setBackground(Color.GRAY);
 
-		janela.add(window);
 
 		window.setScene(scene);
 		window.setCamera(camera);
+		window.RenderFrame(99999);
 		
 		engine.createRunnableStart(() -> {
-			window.renderFrame();
-		}, 99999);
-		
-		engine.createRunnableStart(() -> {
-			System.out.println(fps + " fps");
+			System.out.println(window.getFramerate() + " fps");
 			fps = 0;
 		}, 1);
 		
 		engine.createRunnableStart(() -> {
 			double x = camera.getPosition().getX() + vetorA + vetorD;
-			double y = camera.getPosition().getY() + vetorW + vetorS;
+			double y = camera.getPosition().getY() + vetorS + vetorW;
+			double z = camera.getRadius() + vetorC + vetorV;
 			camera.setPosition(new GameEngine2D.Vector2d(x, y));
+			camera.setRadius(z);
 		}, 120);
 		
 	}
@@ -296,10 +294,12 @@ class GameEngine2D{
 	static class RenderWindow extends JPanel{
 		
 		private static final long serialVersionUID = 1L;
+		
 		private Scene scene = new Scene();
 		private Camera camera = new Camera();
-		private Graphics graphics;
-		
+		private boolean stop = false;
+		private int fps;
+
 		ArrayList<GameObject> gameArray = new ArrayList<GameObject>();
 		
 		public void setScene(Scene scene_t) {
@@ -309,12 +309,11 @@ class GameEngine2D{
 		public void setCamera(Camera camera_t) {
 			this.camera = camera_t;
 		}
-
-		public void renderFrame() {
-			graphics = super.getGraphics();
-			super.repaint();
-			/*
-			//Camera Position
+		
+		@Override
+		protected void paintComponent(Graphics g) {
+			this.fps++;
+			g.clearRect(0, 0, this.getWidth(), this.getHeight());
 			double x = camera.getPosition().getX();
 			double y = camera.getPosition().getY();
 			double z = camera.getRadius();
@@ -322,8 +321,8 @@ class GameEngine2D{
 			double PartX = this.getWidth() / z;
 			double PartY = (camera.getStretch()) ? this.getHeight() / z: this.getWidth() / z;
 			
-			double X_cart = -x + z / 2;
-			double Y_cart = y + z / 2;
+			double X_cart = x + z / 2;
+			double Y_cart = -y + z / 2;
 			ArrayList<GameObject> comps = scene.getObjectsOnRadius(new Vector2d(x,y), z);
 			for (GameObject comp : comps) {
 				int width = (int) (PartX * comp.getScale().getX());
@@ -331,17 +330,36 @@ class GameEngine2D{
 				
 				int x_local = (int) (PartX * (comp.getPosition().getX() + X_cart) - width/2);
 				int y_local = (int) (PartY * (comp.getPosition().getY() + Y_cart) - height/2);
-				graphics.setColor(comp.getTexture().getBaseColor());
-				graphics.fillRect(x_local, y_local, width, height);
+				g.setColor(comp.getTexture().getBaseColor());
+				g.fillRect(x_local, y_local, width, height);
 			}
-			super.paintComponent(graphics);*/
 		}
+		
+		public void RenderFrame(int FPS){
+				int FramePorSeconds = 1000 / ((FPS == 0) ? 1 : FPS);
+				new Thread(() -> {
+					while(!stop){
+						try {
+							Thread.sleep(FramePorSeconds);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						this.repaint();
+					}
+			}).start();
+		}
+		
+		public void stopRender() {
+			this.stop = true;
+		}
+		
+		public int getFramerate() {
+			int fps_t = this.fps;
+			fps = 0;
+			return fps_t;
+		}
+		
 
-		@Override
-		public void paintComponent(Graphics g) {
-			
-			super.paintComponent(graphics);
-		}
 	}
 	
 	static class Vector2d {
